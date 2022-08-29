@@ -1119,4 +1119,232 @@ ggplot(k_melt, aes(x=Sample, y=Abundance*100)) +
   theme_bw()+ylab("Relative abundance")+
   theme(axis.text.x = element_blank())
 
+#Funcional Profile: EC functions
+#treatment 
+ec<- read_excel("/Users/Step/Desktop/analysis_nfcore/EC_TABLE.xlsx",
+                   sheet = 'tx_sign', range = NULL)
+
+ec.df<-as.data.frame(ec[c(1,3:306)], na.rm = TRUE)
+row.names(ec.df) <- ec.df$ID
+ec.df <- ec.df[, -1]
+
+anotation_data <- as.data.frame(ec[1:3])
+row.names(anotation_data) <- ec$ID
+anotation_data <- anotation_data[, -1]
+anotation_data <- anotation_data[1]
+
+row.names(anotation_data) <- row.names(ec.df)
+library(paletteer)
+library(pheatmap)
+color<- paletteer_c("ggthemes::Blue", 30)
+
+annoCol<-list(TREATAMENT=c(NTX="#F8766D", TX="#00BFC4"))
+
+pheatmap(ec.df, color=color,annotation_colors = annoCol,
+         show_rownames=T, cluster_cols=T, cluster_rows=T, scale="column",
+         cex=1, clustering_distance_rows="euclidean", cex=1,
+         clustering_distance_cols="euclidean", clustering_method="complete", border_color=FALSE, annotation_row = anotation_data, show_colnames = FALSE)
+
+
+#relapse
+
+ec<- read_excel("/Users/Step/Desktop/analysis_nfcore/EC_TABLE.xlsx",
+                   sheet = 'relapse_sign', range = NULL)
+ec.df<-as.data.frame(ec[c(1,3:161)])
+row.names(ec.df) <- ec.df$ID
+ec.df <- ec.df[, -1]
+
+anotation_data <- as.data.frame(ec[1:3])
+row.names(anotation_data) <- ec$ID
+anotation_data <- anotation_data[, -1]
+anotation_data <- anotation_data[1]
+
+row.names(anotation_data) <- row.names(ec.df)
+color<- paletteer_c("ggthemes::Blue", 60)
+
+pheatmap(ec.df, color=color,annotation_colors = annoCol,
+         show_rownames=T, cluster_cols=T, cluster_rows=T, scale="column",
+         cex=1, clustering_distance_rows="euclidean", cex=1,
+         clustering_distance_cols="euclidean", clustering_method="complete", border_color=FALSE, annotation_row = anotation_data, show_colnames = FALSE)
+
+#fusobacterium
+
+ec<- read_excel("/Users/Step/Desktop/analysis_nfcore/EC_TABLE.xlsx",
+                   sheet = 'fuso_sign', range = NULL)
+ec.df<-as.data.frame(ec[c(1,3:45)])
+row.names(ec.df) <- ec.df$ID
+ec.df <- ec.df[, -1]
+
+anotation_data <- as.data.frame(ec[1:3])
+row.names(anotation_data) <- ec$ID
+anotation_data <- anotation_data[, -1]
+anotation_data <- anotation_data[1]
+
+row.names(anotation_data) <- row.names(ec.df)
+color<- paletteer_c("ggthemes::Blue", 60)
+
+annoCol<-list(FUSO=c(HIGH="#F8766D", LOW="#00BA38", NEG="#619CFF"))
+pheatmap(ec.df, color=color,annotation_colors = annoCol,
+         show_rownames=T, cluster_cols=T, cluster_rows=T, scale="column",
+         cex=1, clustering_distance_rows="euclidean", cex=1,
+         clustering_distance_cols="euclidean", clustering_method="complete", border_color=FALSE, annotation_row = anotation_data, show_colnames = FALSE)
+
+## Metacyc Pathways
+#treatament
+
+met <- read_excel("/Users/Step/Desktop/analysis_nfcore/METACYC.xlsx",
+                   sheet = 'tx_sign', range = NULL)
+
+met.df<-as.data.frame(met[c(1,3:50)], na.rm = TRUE)
+row.names(met.df) <- met.df$ID
+met.df <- met.df[, -1]
+
+anotation_data <- as.data.frame(met[1:3])
+row.names(anotation_data) <- met$ID
+anotation_data <- anotation_data[, -1]
+anotation_data <- anotation_data[1]
+
+# row.names(anotation_data) <- row.names(ec.df)
+
+color<- paletteer_c("ggthemes::Blue", 30)
+
+annoCol<-list(TREATAMENT=c(NTX="#F8766D", TX="#00BFC4"))
+
+pheatmap(met.df, color=color,annotation_colors = annoCol,
+         show_rownames=T, cluster_cols=T, cluster_rows=T, scale="column",
+         cex=1, clustering_distance_rows="euclidean", cex=1,
+         clustering_distance_cols="euclidean", clustering_method="complete", border_color=FALSE, annotation_row = anotation_data, show_colnames = FALSE)
+
+#relapse
+
+met <- read_excel("/Users/Step/Desktop/analysis_nfcore/METACYC.xlsx",
+                   sheet = 'relapse_sign', range = NULL)
+
+met.df<-as.data.frame(met[c(1,3:34)], na.rm = TRUE)
+row.names(met.df) <- met.df$ID
+met.df <- met.df[, -1]
+
+anotation_data <- as.data.frame(met[1:3])
+row.names(anotation_data) <- met$ID
+anotation_data <- anotation_data[, -1]
+anotation_data <- anotation_data[1]
+
+# row.names(anotation_data) <- row.names(ec.df)
+
+color<- paletteer_c("ggthemes::Blue", 30)
+
+annoCol<-list(RELAPSE=c(YES="#8B0A50", NO="#CDB79E"))
+
+pheatmap(met.df, color=color,annotation_colors = annoCol,
+         show_rownames=T, cluster_cols=T, cluster_rows=T, scale="column",
+         cex=1, clustering_distance_rows="euclidean", cex=1,
+         clustering_distance_cols="euclidean", clustering_method="complete", border_color=FALSE, annotation_row = anotation_data, show_colnames = FALSE)
+
+#fuso
+
+met <- read_excel("/Users/Step/Desktop/analysis_nfcore/METACYC.xlsx",
+                   sheet = 'fuso_sign', range = NULL)
+
+met.df<-as.data.frame(met[c(1,3:12)], na.rm = TRUE)
+row.names(met.df) <- met.df$ID
+met.df <- met.df[, -1]
+
+anotation_data <- as.data.frame(met[1:3])
+row.names(anotation_data) <- met$ID
+anotation_data <- anotation_data[, -1]
+anotation_data <- anotation_data[1]
+
+
+color<- paletteer_c("ggthemes::Blue", 30)
+
+annoCol<-list(FUSO=c(HIGH="#F8766D", LOW="#00BA38", NEG="#619CFF"))
+
+pheatmap(met.df, color=color,annotation_colors = annoCol,
+         show_rownames=T, cluster_cols=T, cluster_rows=T, scale="column",
+         cex=1, clustering_distance_rows="euclidean", cex=1,
+         clustering_distance_cols="euclidean", clustering_method="complete", border_color=FALSE, annotation_row = anotation_data, show_colnames = FALSE)
+         
+#Kyoto Encyclopedia of Genes and Genomes (KEGG)
+
+#treatament
+
+ko <- read_excel("/Users/Step/Desktop/analysis_nfcore/ko_function.xlsx",
+                   sheet = 'TX_SIGN', range = NULL)
+
+ko.df<-as.data.frame(ko[c(1,3:993)], na.rm = TRUE)
+row.names(ko.df) <- ko.df$ID
+ko.df <- ko.df[, -1]
+
+anotation_data <- as.data.frame(ko[1:3])
+row.names(anotation_data) <- ko$ID
+anotation_data <- anotation_data[, -1]
+anotation_data <- anotation_data[1]
+
+row.names(anotation_data) <- row.names(ko.df)
+library(paletteer)
+library(pheatmap)
+color<- paletteer_c("ggthemes::Blue", 30)
+
+annoCol<-list(TREATAMENT=c(NTX="#F8766D", TX="#00BFC4"))
+
+pheatmap(ko.df, color=color,annotation_colors = annoCol,
+         show_rownames=T, cluster_cols=T, cluster_rows=T, scale="column",
+         cex=1, clustering_distance_rows="euclidean", cex=1,
+         clustering_distance_cols="euclidean", clustering_method="complete", border_color=FALSE, annotation_row = anotation_data, show_colnames = F)
+
+#####fuso 
+
+ko <- read_excel("/Users/Step/Desktop/analysis_nfcore/ko_function.xlsx",
+                   sheet = 'FUSO_SIGN', range = NULL)
+
+ko.df<-as.data.frame(ko[c(1,3:226)], na.rm = TRUE)
+row.names(ko.df) <- ko.df$ID
+ko.df <- ko.df[, -1]
+
+anotation_data <- as.data.frame(ko[1:3])
+row.names(anotation_data) <- ko$ID
+anotation_data <- anotation_data[, -1]
+anotation_data <- anotation_data[1]
+
+              
+row.names(anotation_data) <- row.names(ko.df)
+library(paletteer)
+library(pheatmap)
+color<- paletteer_c("ggthemes::Blue", 30)
+annoCol<-list(FUSO=c(HIGH="#F8766D", LOW="#00BA38", NEG="#619CFF"))
+
+
+pheatmap(ko.df, color=color,annotation_colors = annoCol,
+         show_rownames=T, cluster_cols=T, cluster_rows=T, scale="column",
+         cex=1, clustering_distance_rows="euclidean", cex=1,
+         clustering_distance_cols="euclidean", clustering_method="complete", border_color=FALSE, annotation_row = anotation_data, show_colnames = F)
+
+
+#####RELAPSE
+
+ko <- read_excel("/Users/Step/Desktop/analysis_nfcore/ko_function.xlsx",
+                   sheet = 'Foglio9', range = NULL)
+
+ko.df<-as.data.frame(ko[c(1,3:595)], na.rm = TRUE)
+ko.df <- na.omit(ko.df)
+row.names(ko.df) <- ko.df$ID
+ko.df <- ko.df[, -1]
+
+anotation_data <- as.data.frame(ko[1:3])
+row.names(anotation_data) <- ko$ID
+anotation_data <- anotation_data[, -1]
+anotation_data <- anotation_data[1]
+
+              
+row.names(anotation_data) <- row.names(ko.df)
+color<- paletteer_c("ggthemes::Blue", 30)
+annoCol<-list(RELAPSE=c(YES="#8B0A50", NO="#CDB79E"))
+
+
+pheatmap(ko.df, color=color,annotation_colors = annoCol,
+         show_rownames=T, cluster_cols=T, cluster_rows=T, scale="column",
+         cex=1, clustering_distance_rows="euclidean", cex=1,
+         clustering_distance_cols="euclidean", clustering_method="complete", border_color=FALSE, annotation_row = anotation_data, show_colnames = F)
+
+
 
