@@ -115,7 +115,7 @@ nfcore2$SEQ <- factor(nfcore2$SEQ, levels = c("FUSO HIGH", "FUSO LOW","FUSO NEG"
 
 ggplot(data = nfcore2, aes(x = SEQ ))+
 geom_bar(aes(fill = ISH), position = "stack")+theme_bw()+
-  scale_fill_manual(values=c("#F8766D", "#00BA38", "#619CFF"))
+  scale_fill_manual(values=c("#F8766D", "#00BA38", "#619CFF")) 
 
 library(dplyr)
 d2 <- nfcore2 %>%
