@@ -1,0 +1,360 @@
+####################### Metagenomics analysis between FFPE and FF tissue ############################
+
+#######correlation analysis
+
+ale <- read_excel("/Users/Step/Desktop/analysis_nfcore/Ale_RA_def.xlsx",
+                    sheet = 'Definitivo', range = NULL)
+
+step<-read_excel("/Users/Step/Desktop/analysis_nfcore/rel-table_Step.xlsx",
+                    sheet = 'rel-table-7', range = NULL)
+
+identical(ale$OTU, step$`OTU _ID`)
+
+x<- ale
+y<-step
+
+x<-as.numeric(unlist(x))
+y<-as.numeric(unlist(y))
+
+tax<-cor( x, y,method = "spearman")
+
+  xy<-as.data.frame(cbind(x,y))
+  row.names(x) <- row.names(y)
+  gg<-ggscatter(xy, x = "x", y = "y",
+                add = "reg.line", conf.int = TRUE,
+                cor.coef = TRUE, cor.method = "spearman",
+                xlab = "Reference", ylab = "Nf-core ampliseq")
+
+gg+geom_smooth(method=lm , color="black", fill="#00AFBB", se=TRUE)  
+
+data_ish <- read_excel("/Users/Step/Desktop/analysis_nfcore/rel-table_Step.xlsx", 
+                   sheet = 'ale', range = NULL)
+
+data_ish$ISH <- factor(data_ish$ISH, levels = c("POS", "NEG"))
+data_ish$SEQ <- factor(data_ish$SEQ, levels = c("FUSO POS", "FUSO NEG"))
+
+library(dplyr)
+d2 <- data_ish %>%
+  group_by(SEQ, ISH) %>%
+  summarise(count = n()) %>%
+  mutate(perc = count/sum(count))
+
+ggplot(d2, aes(x = factor(SEQ), y = perc*100, fill = factor(ISH))) +
+  geom_bar(stat="identity", width = 0.7) +
+  labs(x = "SEQ", y = "percent", fill = "ISH") +
+  theme_minimal(base_size = 14)+
+  geom_text(aes(label=count), color="white")
+
+
+data_ish2 <- read_excel("/Users/Step/Desktop/analysis_nfcore/rel-table_Step.xlsx", 
+                       sheet = 'step', range = NULL)
+
+data_ish2$ISH <- factor(data_ish2$ISH, levels = c("POS", "NEG"))
+data_ish2$SEQ <- factor(data_ish2$SEQ, levels = c("FUSO POS", "FUSO NEG"))
+
+library(dplyr)
+d2 <- data_ish2 %>%
+  group_by(SEQ, ISH) %>%
+  summarise(count = n()) %>%
+  mutate(perc = count/sum(count))
+
+ggplot(d2, aes(x = factor(SEQ), y = perc*100, fill = factor(ISH))) +
+  geom_bar(stat="identity", width = 0.7) +
+  labs(x = "SEQ", y = "percent", fill = "ISH") +
+  theme_minimal(base_size = 14)
+
+step_phylum<-read_excel("/Users/Step/Desktop/analysis_nfcore/rel-table_Step.xlsx",
+                 sheet = 'Foglio2', range = NULL)
+
+bp<- ggplot(step_phylum, aes(x="", y=value, fill=phylum))+
+  geom_bar(width = 1, stat = "identity")+
+  theme_bw()
+
+pie <- bp + coord_polar("y", start=0)
+
+blank_theme <- theme_minimal()+
+  theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    panel.border = element_blank(),
+    panel.grid=element_blank(),
+    axis.ticks = element_blank(),
+    plot.title=element_text(size=14, face="bold")
+  )
+
+pie + blank_theme +
+  theme(axis.text.x=element_blank())
+
+
+ale_phylum <- read_excel("/Users/Step/Downloads/Ale_RA.xlsx",
+                  sheet = 'Foglio3', range = NULL)
+
+bp<- ggplot(ale_phylum, aes(x="", y=value, fill=phylum))+
+  geom_bar(width = 1, stat = "identity")+
+  theme_bw()
+
+pie <- bp + coord_polar("y", start=0)
+
+blank_theme <- theme_minimal()+
+  theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    panel.border = element_blank(),
+    panel.grid=element_blank(),
+    axis.ticks = element_blank(),
+    plot.title=element_text(size=14, face="bold")
+  )
+
+pie + blank_theme +
+  theme(axis.text.x=element_blank())
+
+
+fisher2<- read_excel("/Users/Step/Downloads/Ale_RA.xlsx",
+                         sheet = 'Foglio4', range = NULL)
+
+df2<- as.data.frame(fisher2[,2:3])
+fisher.test(df2)
+
+
+######Fuso detection
+
+
+library(dplyr)
+
+data <- read_excel("/Users/Step/Desktop/analysis_nfcore/rel-table_Step.xlsx", 
+                   sheet = 'fuso', range = NULL)
+
+data$GROUP <- factor(data$GROUP, levels = c("ampli_S138", "reference_RDP"))
+
+ggplot(data, aes(x = GROUP, y = VALUE, fill = GROUP)) +
+  geom_boxplot()  +
+  geom_jitter(size=0.4, alpha=0.9)+
+  scale_fill_manual(values = c("#00AFBB", "#FFCC66"))+
+  stat_compare_means(label.x=1.40)+
+  labs(x = "Database.", y = "Fuso RA")+
+  theme_bw()
+
+group_by(data, GROUP) %>%
+  summarise(
+    mean = mean(VALUE, na.rm = TRUE),
+    sd = sd(VALUE, na.rm = TRUE),
+    median = median(VALUE, na.rm = TRUE),
+    IQR = IQR(VALUE, na.rm = TRUE)
+  )
+
+library("ggpubr")
+ggline(data, x = "GROUP", y = "VALUE", color = "CASE", point.color ="PRES",
+       ylab = "Fuso RA", xlab = "Database")+
+  scale_color_manual(values = c("FF"="#00AFBB", "FFPE"="#FFCC66"))+
+  theme(legend.position="bottom",legend.text = element_text(size=10))+
+  theme_minimal()
+
+ggline(data, x = "GROUP", y = "VALUE", color = "CASE", point.color = "FUSO",
+       order = c("ampli_S138", "ampli_S132", "external_S132" ),
+       ylab = "Fuso RA", xlab = "Database")+
+  scale_color_manual(values = c("HIGH"="#F8766D","LOW"="#00BA38","NEG"="#619CFF"))+
+  theme(legend.position="bottom",legend.text = element_text(size=10))+
+  theme_minimal()
+
+
+############alfa diversity ampliseq
+
+data <- read_excel("/Users/Step/Desktop/analysis_nfcore/rel-table_Step.xlsx", 
+                   sheet = 'diversity', range = NULL)
+data.df<-as.data.frame(data[3:376])
+
+H<- diversity(data.df)
+richness <- specnumber(data.df) 
+evenness <- H/log(richness)
+alpha <- cbind(shannon = H, richness = richness, pielou = evenness, data)
+
+alpha$GROUP <- factor(alpha$GROUP, levels = c("FF", "FFPE"))
+
+h<-ggplot(alpha, aes(x = GROUP, y = evenness, fill = GROUP)) +
+  geom_boxplot()  +
+  geom_jitter(size=0.4, alpha=0.9)+
+  scale_fill_manual(values = c("#00AFBB", "#FFCC66"))+
+  stat_compare_means(label.x=1.40)+
+  labs(x = "GROUPS", y = "Evenness")+
+  theme_bw()
+
+i<-ggplot(alpha, aes(x = GROUP, y = richness, fill = GROUP)) +
+  geom_boxplot()  +
+  geom_jitter(size=0.4, alpha=0.9)+
+  scale_fill_manual(values = c("#00AFBB", "#FFCC66"))+
+  stat_compare_means(label.x=1.40)+
+  labs(x = "GROUP", y = "Richness")+
+  theme_bw()
+
+j<-ggplot(alpha, aes(x = GROUP, y = H, fill = GROUP)) +
+  geom_boxplot()  +
+  geom_jitter(size=0.4, alpha=0.9)+
+  scale_fill_manual(values = c("#00AFBB", "#FFCC66"))+
+  stat_compare_means(label.x=1.40)+
+  labs(x = "GROUP", y = "Shannon")+
+  theme_bw()
+
+#####reference
+
+data2 <- read_excel("/Users/Step/Downloads/Ale_RA.xlsx",
+                    sheet = 'Foglio1', range = NULL)
+data.df2 <- as.data.frame(data2[3:328])
+
+H2<- diversity(data.df2)
+richness2 <- specnumber(data.df2) 
+evenness2 <- H2/log(richness2)
+alpha2 <- cbind(shannon = H2, richness = richness2, pielou = evenness2, data2)
+
+alpha2$GROUP <- factor(alpha2$GROUP, levels = c("FF", "FFPE"))
+
+m<-ggplot(alpha2, aes(x = GROUP, y = evenness2, fill = GROUP)) +
+  geom_boxplot()  +
+  geom_jitter(size=0.4, alpha=0.9)+
+  scale_fill_manual(values = c("#00AFBB", "#FFCC66"))+
+  stat_compare_means(label.x=1.40)+
+  labs(x = "GROUP", y = "Evenness")+
+  theme_bw()
+
+n<-ggplot(alpha2, aes(x = GROUP, y = richness2, fill = GROUP)) +
+  geom_boxplot()  +
+  geom_jitter(size=0.4, alpha=0.9)+
+  scale_fill_manual(values = c("#00AFBB", "#FFCC66"))+
+  stat_compare_means(label.x=1.40)+
+  labs(x = "GROUP", y = "Richness")+
+  theme_bw()
+
+o<-ggplot(alpha2, aes(x = GROUP, y = H2, fill = GROUP)) +
+  geom_boxplot()  +
+  geom_jitter(size=0.4, alpha=0.9)+
+  scale_fill_manual(values = c("#00AFBB", "#FFCC66"))+
+  stat_compare_means(label.x=1.40)+
+  labs(x = "GROUP", y = "Shannon")+
+  theme_bw()
+
+grid.arrange(m,n,o,h,i,j, nrow=2, ncol=3)
+
+#######BETA DIVERSITY ampliseq
+
+library(dplyr)
+
+data.mdf <- as.matrix.data.frame(data.df)
+rownames(data.mdf) <- data$CASE
+data$GROUP<-as.factor(data$GROUP)
+
+data.bray <- vegdist(data.mdf, method = "bray")
+
+# calculate principal coordinates analysis (Bray-Curtis)
+pcoa.data.bray <- cmdscale(data.bray, k = 2, eig = T)
+
+# extract axis positions for each site from cmdscale object and create a dataframe for plotting
+pcoa.data.bray.plotting <- as.data.frame(pcoa.data.bray$points)
+colnames(pcoa.data.bray.plotting) <- c("axis_1", "axis_2")
+pcoa.data.bray.plotting$site <- rownames(pcoa.data.bray.plotting)
+
+# calculate the proportion of variance in the data which is explained by the first two PCoA axes
+p1<-pcoa.data.bray$eig[1]/(sum(pcoa.data.bray$eig))
+p2<-pcoa.data.bray$eig[2]/(sum(pcoa.data.bray$eig))
+
+data$site<-data$CASE
+pcoa.data.bray.plotting<-dplyr::left_join(pcoa.data.bray.plotting, distinct(data), by = "site")
+pcoa.data.bray.plotting$GROUP <- factor(pcoa.data.bray.plotting$GROUP, levels = c("FF", "FFPE", "NEG"))
+
+bray <- ggplot(pcoa.data.bray.plotting, aes(x = axis_1, y = axis_2, colour=GROUP, label=CASE)) +
+  scale_color_manual(values = c("#00AFBB", "#FFCC66"))+
+  geom_point() +geom_text(hjust=0, vjust=0)+
+  geom_point(size = 3, ) +
+  theme_bw() +
+  xlab("PCoA 1 (52.9%)") +
+  ylab("PCoA 2 (18.1%)") +
+  annotate(geom = 'text', label = "",x = Inf, y = -Inf, hjust = 1.15, vjust = -1)
+
+adonis<-adonis2(data.bray ~ GROUP, data = data, permutations = 999)
+
+#repeat the process with jaccard 
+data.jac <- vegdist(data.mdf, method = "jaccard", binary = T)
+pcoa.meio.jac <- cmdscale(data.jac, k = 2, eig = T)
+pcoa.meio.jac.plotting <- as.data.frame(pcoa.meio.jac$points)
+colnames(pcoa.meio.jac.plotting) <- c("axis_1", "axis_2")
+pcoa.meio.jac.plotting$site <- rownames(pcoa.meio.jac.plotting)
+
+p.j.1<-pcoa.meio.jac$eig[1]/(sum(pcoa.meio.jac$eig))
+p.j.2<-pcoa.meio.jac$eig[2]/(sum(pcoa.meio.jac$eig))
+
+data$site<-data$CASE
+pcoa.meio.jac.plotting<-dplyr::left_join(pcoa.meio.jac.plotting, distinct(data), by = "site")
+pcoa.meio.jac.plotting$GROUP <- factor(pcoa.meio.jac.plotting$GROUP, levels = c("FF", "FFPE"))
+
+jac<- ggplot(pcoa.meio.jac.plotting, aes(x = axis_1, y = axis_2, colour=GROUP, label=CASE)) +
+  scale_color_manual(values = c("#00AFBB", "#FFCC66"))+
+  geom_point() +geom_text(hjust=0, vjust=0)+
+  geom_point(size = 3, ) +
+  theme_bw() +
+  xlab("PCoA 1 (31.6%)") +
+  ylab("PCoA 2 (24.0%)") +
+  annotate(geom = 'text', label = "", x = Inf, y = -Inf, hjust = 1.215, vjust = -1)
+
+adonis.jak<-adonis2(data.jac ~ GROUP, data = data, permutations = 999)
+
+
+#######BETA DIVERSITY reference
+
+data.mdf2 <- as.matrix.data.frame(data.df2)
+rownames(data.mdf2) <- data2$CASE
+data2$GROUP<-as.factor(data2$GROUP)
+
+data.bray2 <- vegdist(data.mdf2, method = "bray")
+
+# calculate principal coordinates analysis (Bray-Curtis)
+pcoa.data.bray2 <- cmdscale(data.bray2, k = 2, eig = T)
+
+# extract axis positions for each site from cmdscale object and create a dataframe for plotting
+pcoa.data.bray.plotting2 <- as.data.frame(pcoa.data.bray2$points)
+colnames(pcoa.data.bray.plotting2) <- c("axis_1", "axis_2")
+pcoa.data.bray.plotting2$site <- rownames(pcoa.data.bray.plotting2)
+
+# calculate the proportion of variance in the data which is explained by the first two PCoA axes
+p1_2<-pcoa.data.bray2$eig[1]/(sum(pcoa.data.bray2$eig))
+p2_2<-pcoa.data.bray2$eig[2]/(sum(pcoa.data.bray2$eig))
+
+data2$site<-data2$CASE
+pcoa.data.bray.plotting2<-dplyr::left_join(pcoa.data.bray.plotting2, distinct(data2), by = "site")
+
+bray2 <- ggplot(pcoa.data.bray.plotting2, aes(x = axis_1, y = axis_2, colour=GROUP, label=CASE)) +
+  scale_color_manual(values = c("#00AFBB", "#FFCC66"))+
+  geom_point() +geom_text(hjust=0, vjust=0)+
+  geom_point(size = 3, ) +
+  theme_bw() +
+  xlab("PCoA 1 (52.9%)") +
+  ylab("PCoA 2 (18.1%)") +
+  annotate(geom = 'text', label= "",x = Inf, y = -Inf, hjust = 1.15, vjust = -1)
+
+adonis2<-adonis2(data.bray2 ~ GROUP, data = data2, permutations = 999)
+
+
+#repeat the process with jaccard 
+data.jac2 <- vegdist(data.mdf2, method = "jaccard", binary = T)
+pcoa.meio.jac2 <- cmdscale(data.jac2, k = 2, eig = T)
+pcoa.meio.jac.plotting2 <- as.data.frame(pcoa.meio.jac2$points)
+colnames(pcoa.meio.jac.plotting2) <- c("axis_1", "axis_2")
+pcoa.meio.jac.plotting2$site <- rownames(pcoa.meio.jac.plotting2)
+
+p.j2.1<-pcoa.meio.jac2$eig[1]/(sum(pcoa.meio.jac2$eig))
+p.j2.2<-pcoa.meio.jac2$eig[2]/(sum(pcoa.meio.jac2$eig))
+
+data2$site<-data2$CASE
+pcoa.meio.jac.plotting2<-dplyr::left_join(pcoa.meio.jac.plotting2, distinct(data2), by = "site")
+pcoa.meio.jac.plotting2$GROUP <- factor(pcoa.meio.jac.plotting2$GROUP, levels = c("FF", "FFPE"))
+
+jac2<- ggplot(pcoa.meio.jac.plotting2, aes(x = axis_1, y = axis_2, colour=GROUP, label=CASE)) +
+  scale_color_manual(values = c("#00AFBB", "#FFCC66"))+
+  geom_point() +geom_text(hjust=0, vjust=0)+
+  geom_point(size = 3, ) +
+  theme_bw() +
+  xlab("PCoA 1 (31.6%)") +
+  ylab("PCoA 2 (24.0%)") +
+  annotate(geom = 'text', label = "",, x = Inf, y = -Inf, hjust = 1.215, vjust = -1)
+
+adonis.jak2<-adonis2(data.jac2 ~ GROUP, data = data2, permutations = 999)
+
+grid.arrange(bray2,jac2,bray,jac, nrow=2, ncol=2)
+
