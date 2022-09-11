@@ -1,4 +1,4 @@
-# Metagenomics-analysis_TFM
+# Metagenomics-analysis 
 
 This is the script used for the downstream analysis that allowed to analyze the results from nf-core ampliseq pipeline. 
 
